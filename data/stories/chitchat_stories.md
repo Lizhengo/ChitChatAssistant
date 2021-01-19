@@ -22,7 +22,6 @@
 * deny
     - utter_answer_deny
 
-
 ## say goodbye
 * goodbye
     - utter_answer_goodbye
@@ -62,6 +61,4 @@
     - utter_answer_greet
 * whattodo
     - utter_answer_whattodo    
-    
-
     

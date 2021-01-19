@@ -63,6 +63,7 @@ def requestRasabotServer(userid, content):
 
 if __name__ == '__main__':
     webIp = '127.0.0.1'
+    webIp = '172.17.230.177'
     webPort = '8088'
 
     print("##### webIp={}, webPort={}".format(webIp, webPort))

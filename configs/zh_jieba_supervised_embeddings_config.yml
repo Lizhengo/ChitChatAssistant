@@ -2,7 +2,6 @@ language: "zh"
 
 pipeline:
 - name: "JiebaTokenizer"
-  dictionary_path: "data/dict"
 - name: "RegexFeaturizer"
 - name: "CRFEntityExtractor"
 - name: "EntitySynonymMapper"
@@ -18,6 +17,7 @@ policies:
     epochs: 100
     max_history: 5
   - name: FallbackPolicy
+    nlu_threshold: 0.6
     fallback_action_name: 'action_default_fallback'
   - name: MemoizationPolicy
     max_history: 5

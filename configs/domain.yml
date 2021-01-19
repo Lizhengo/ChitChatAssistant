@@ -6,40 +6,99 @@ intents:
   - thanks
   - whoareyou
   - whattodo
-  - request_weather
-  - request_number
-  - inform
-  - inform_business
+  - address_inform
+  - time_inform
+  - choose_inform
+  - request_trip
   - stop
-  - chitchat
 
 session_config:
   carry_over_slots_to_new_session: true
   session_expiration_time: 60
 
 slots:
-  date_time:
+  start_time:
     type: unfeaturized
     auto_fill: false
-  address:
+  end_time:
+    type: unfeaturized
+    auto_fill: false
+  start_address:
+    type: unfeaturized
+    auto_fill: false
+  end_address:
+    type: unfeaturized
+    auto_fill: false
+  task:
+    type: unfeaturized
+    auto_fill: false
+  item:
+    type: unfeaturized
+    auto_fill: false
+  it_item_num:
+    type: unfeaturized
+    auto_fill: false
+  fin_item_num:
     type: unfeaturized
     auto_fill: false
   type:
     type: unfeaturized
     auto_fill: false
-  number:
+  tiaoxian:
     type: unfeaturized
     auto_fill: false
-  business:
+  baoxiaodiqu:
+    type: unfeaturized
+    auto_fill: false
+  baoxiaobumen:
+    type: unfeaturized
+    auto_fill: false
+  receive:
+    type: unfeaturized
+    auto_fill: false
+  ruzhudi:
+    type: unfeaturized
+    auto_fill: false
+  chengjicishu:
+    type: unfeaturized
+    auto_fill: false
+  chuxingren:
+    type: unfeaturized
+    auto_fill: false
+  person_level:
+    type: unfeaturized
+    auto_fill: false
+  banliyijian:
+    type: unfeaturized
+    auto_fill: false
+  nextnode:
+    type: unfeaturized
+    auto_fill: false
+  nextperson:
     type: unfeaturized
     auto_fill: false
 
 entities:
-  - date_time
-  - address
+  - start_time
+  - end_time
+  - start_address
+  - end_address
+  - task
+  - item
+  - it_item_num
+  - fin_item_num
   - type
-  - number
-  - business
+  - baoxiaodiqu
+  - baoxiaobumen
+  - tiaoxian
+  - receive
+  - ruzhudi
+  - chengjicishu
+  - chuxingren
+  - person_level
+  - banliyijian
+  - nextnode
+  - nextperson
 
 actions:
   - utter_answer_affirm
@@ -49,16 +108,47 @@ actions:
   - utter_answer_thanks
   - utter_answer_whoareyou
   - utter_answer_whattodo
-  - utter_ask_date_time
-  - utter_ask_address
-  - utter_ask_number
-  - utter_ask_business
+  - utter_ask_start_time
+  - utter_ask_start_address
+  - utter_ask_end_time
+  - utter_ask_end_address
+  - utter_ask_task
+  - utter_ask_item
+  - utter_ask_it_item_num
+  - utter_ask_fin_item_num
+  - utter_ask_tiaoxian
   - utter_ask_type
+  - utter_ask_baoxiaodiqu
+  - utter_ask_baoxiaobumen
+  - utter_ask_receive
+  - utter_ask_ruzhudi
+  - utter_ask_chengjicishu
+  - utter_ask_chuxingren
+  - utter_ask_person_level
+  - utter_ask_banliyijian
+  - utter_ask_nextnode
+  - utter_ask_nextperson
+  - utter_ask_wheather_trip
+  - utter_wrong_start_time
+  - utter_wrong_end_time
+  - utter_wrong_start_address
+  - utter_wrong_end_address
+  - utter_wrong_trip_type
+  - utter_wrong_baoxiaodiqu
+  - utter_wrong_baoxiaobumen
+  - utter_wrong_tiaoxian
+  - utter_wrong_receive
+  - utter_wrong_it_item_num
+  - utter_wrong_fin_item_num
+  - utter_wrong_nextnode
+  - utter_wrong_person_level
+  - utter_wrong_chengjicishu
   - action_default_fallback
+  - action_trip_jiaoban
 
 forms:
-  - weather_form
-  - number_form
+  - trip_form
+  - jiaoban_form
 
 responses:
   utter_answer_affirm:
@@ -88,43 +178,228 @@ responses:
     - text: "嗯嗯，合作愉快！"
 
   utter_answer_whoareyou:
-    - text: "您好！我是小蒋呀，您的AI智能助理"
+    - text: "您好！我是小兴呀，您的AI智能助理"
 
   utter_answer_whattodo:
-    - text: "您好！很高兴为您服务，我目前只支持查询天气哦。"
+    - text: "您好！很高兴为您服务，我目前支持差旅申请哦。"
+    
+  utter_ask_start_time:
+    - text: "请输入您的出差起始日期，如（2020-06-09）"
+  
+  utter_ask_end_time:
+    - text: "请输入您的出差结束日期，如（2020-06-09）"
+    
+  utter_ask_start_address:
+    - text: "请输入您的差旅出发地"
+  
+  utter_ask_end_address:
+    - text: "请输入您的差旅目的地"
 
-  utter_ask_date_time:
-    - text: "请问您要查询哪一天的天气？"
-
-  utter_ask_address:
-    - text: "请问您要查下哪里的天气？"
-
-  utter_ask_number:
-    - text: "请问您要查的{type}号码是多少？"
-
-  utter_ask_business:
-    - text: "请问您要查询什么业务呢？"
-
+  utter_ask_task:
+    - text: "请输入您的出行任务"
+    
+  utter_ask_item:
+    - text: "请输入您的项目, 若没有可填'无'"
+    
+  utter_ask_it_item_num:
+    - text: "请输入IT综合管理平台项目编号，如CP[2019]123, 若没有可填'无'"
+    
+  utter_ask_fin_item_num:
+    - text: "请输入财务项目编号，13位数字, 若没有可填'无'"
+  
+  utter_ask_tiaoxian:
+    - text: "请选择您的条线"
+      buttons:
+        - title: "信用卡中心"
+          payload: '/choose_inform{"tiaoxian": "信用卡中心"}'
+        - title: "同业"
+          payload: '/choose_inform{"tiaoxian": "同业"}'
+        - title: "企金"
+          payload: '/choose_inform{"tiaoxian": "企金"}'
+        - title: "零售"
+          payload: '/choose_inform{"tiaoxian": "零售"}'
+        - title: "投金"
+          payload: '/choose_inform{"tiaoxian": "投金"}'
+        - title: "其他"
+          payload: '/choose_inform{"tiaoxian": "其他"}'
+    
+  utter_ask_type:
+    - text: "请选择您的出差类型"
+      buttons:
+        - title: "短期出差"
+          payload: '/choose_inform{"type": "短期出差"}'
+        - title: "长期出差"
+          payload: '/choose_inform{"type": "长期出差"}'
+        - title: "研发项目"
+          payload: '/choose_inform{"type": "研发项目"}'
+        - title: "系统内培训"
+          payload: '/choose_inform{"type": "系统内培训"}'
+        - title: "系统外培训"
+          payload: '/choose_inform{"type": "系统外培训"}'
+        - title: "系统内会议"
+          payload: '/choose_inform{"type": "系统内会议"}'
+        - title: "系统外会议"
+          payload: '/choose_inform{"type": "系统外会议"}'
+    
+  utter_ask_baoxiaodiqu:
+    - text: "请选择您的报销地区"
+      buttons:
+        - title: "福州"
+          payload: '/choose_inform{"baoxiaodiqu": "福州"}'
+        - title: "上海"
+          payload: '/choose_inform{"baoxiaodiqu": "上海"}'
+        - title: "北京"
+          payload: '/choose_inform{"baoxiaodiqu": "北京"}'
+        - title: "成都"
+          payload: '/choose_inform{"baoxiaodiqu": "成都"}'
+        - title: "武汉"
+          payload: '/choose_inform{"baoxiaodiqu": "武汉"}'
+        - title: "深圳"
+          payload: '/choose_inform{"baoxiaodiqu": "深圳"}'
+        - title: "厦门"
+          payload: '/choose_inform{"baoxiaodiqu": "厦门"}'
+        - title: "广州"
+          payload: '/choose_inform{"baoxiaodiqu": "广州"}'
+        - title: "西安"
+          payload: '/choose_inform{"baoxiaodiqu": "西安"}'
+        - title: "沈阳"
+          payload: '/choose_inform{"baoxiaodiqu": "沈阳"}'
+    
+  utter_ask_baoxiaobumen:
+    - text: "请选择您的报销部门"
+      buttons:
+        - title: "研发中心_成都"
+          payload: '/choose_inform{"baoxiaobumen": "研发中心_成都"}'
+        - title: "数据中心_福州"
+          payload: '/choose_inform{"baoxiaobumen": "数据中心_福州"}'
+        - title: "信息中心_福州"
+          payload: '/choose_inform{"baoxiaobumen": "信息中心_福州"}'
+        - title: "信息中心_上海"
+          payload: '/choose_inform{"baoxiaobumen": "信息中心_上海"}'
+        - title: "数据中心_上海"
+          payload: '/choose_inform{"baoxiaobumen": "数据中心_上海"}'
+        - title: "数据中心_成都"
+          payload: '/choose_inform{"baoxiaobumen": "数据中心_成都"}'
+        - title: "研发中心_上海"
+          payload: '/choose_inform{"baoxiaobumen": "研发中心_上海"}'
+        - title: "研发中心_福州"
+          payload: '/choose_inform{"baoxiaobumen": "研发中心_福州"}'
+        - title: "数字卓越中心_上海"
+          payload: '/choose_inform{"baoxiaobumen": "数字卓越中心_上海"}'
+        - title: "数字卓越中心_福州"
+          payload: '/choose_inform{"baoxiaobumen": "数字卓越中心_福州"}'
+        - title: "技术与质量管理中心_上海"
+          payload: '/choose_inform{"baoxiaobumen": "技术与质量管理中心_上海"}'
+        - title: "技术与质量管理中心_福州"
+          payload: '/choose_inform{"baoxiaobumen": "技术与质量管理中心_福州"}'
+        - title: "本部管理处室"
+          payload: '/choose_inform{"baoxiaobumen": "本部管理处室"}'
+    
+  utter_ask_receive:
+    - text: "是否有接待？"
+      buttons:
+        - title: "是"
+          payload: '/choose_inform{"receive": "是"}'
+        - title: "否"
+          payload: '/choose_inform{"receive": "否"}'
+  
+  utter_ask_ruzhudi:
+    - text: "请输入您的入住地，多个城市用英文分号分隔"
+    
+  utter_ask_chengjicishu:
+    - text: "请输入您的乘机次数，数字即可"
+    
+  utter_ask_chuxingren:
+    - text: "请输入出行人姓名与node_id（英文逗号分隔），如: 张三, 011111"
+  
+  utter_ask_person_level:
+    - text: "请选择出行人行员等级"
+      buttons:
+        - title: "8级及8级以下"
+          payload: '/choose_inform{"person_level": "8级及8级以下"}'
+        - title: "9-12级"
+          payload: '/choose_inform{"person_level": "9-12级"}'
+        - title: "13级"
+          payload: '/choose_inform{"person_level": "13级"}'
+        - title: "14级以上"
+          payload: '/choose_inform{"person_level": "14级以上"}'
+          
+  utter_ask_banliyijian:
+    - text: "请输入办理意见"
+    
+  utter_ask_nextnode:
+    - text: "请选择下一处理步骤"
+      buttons:
+        - title: "处室负责人审核"
+          payload: '/choose_inform{"nextnode": "处室负责人审核"}'
+        - title: "部门成员办理"
+          payload: '/choose_inform{"nextnode": "部门成员办理"}'
+        - title: "部门负责人审核"
+          payload: '/choose_inform{"nextnode": "部门负责人审核"}'
+        - title: "办理"
+          payload: '/choose_inform{"nextnode": "办理"}'
+    
+  utter_ask_nextperson:
+    - text: "请输入下一处理人姓名与node_id（英文逗号分隔），如: 张三, 011111"
+    
   utter_default:
     - text: "没听懂，请换种说法吧~"
-
+  
+  utter_jiaoban_success:
+    - text: "已帮您交办了~"
+  
+  utter_wrong_start_time:
+    - text: "请输入合法的出差起始日期，如（2020-06-09）"
+  
+  utter_wrong_end_time:
+    - text: "请输入合法的出差结束日期，如（2020-06-09）"
+    
+  utter_wrong_start_address:
+    - text: "请输入合法的差旅出发地"
+  
+  utter_wrong_end_address:
+    - text: "请输入合法的差旅目的地"
+    
+  utter_wrong_trip_type:
+    - text: "请按提示选择正确的出差类型"
+  
+  utter_wrong_tiaoxian:
+    - text: "请按提示选择正确的条线"
+    
+  utter_wrong_baoxiaodiqu:
+    - text: "请按提示选择正确的报销地区"
+    
+  utter_wrong_receive:
+    - text: "请按提示选择是否有接待"
+    
+  utter_wrong_baoxiaobumen:
+    - text: "请按提示选择正确的报销部门"
+    
+  utter_wrong_it_item_num:
+    - text: "请正确填写项目呈批件号，例如CP[2019]123"
+    
+  utter_wrong_fin_item_num:
+    - text: "请正确填写财务项目编号，13位数字"
+    
+  utter_wrong_nextnode:
+    - text: "请按提示选择正确的下一处理步骤"
+    
+  utter_wrong_person_level:
+    - text: "请按提示选择正确的行员等级"
+  
+  utter_wrong_chengjicishu:
+    - text: "请输入正确的乘机次数，数字即可"
+    
   utter_ask_continue:
     - text: "请问您还要继续吗?"
-
+  
+  utter_ask_abandon:
+    - text: "请问您确定要放弃本次差旅申请吗?"
+    
+  utter_ask_wheather_trip:
+    - text: "请问您是要进行差旅申请吗?"
+  
   utter_noworries:
     - text: "不用客气 :)"
     - text: "没事啦"
     - text: "不客气哈，都是老朋友了 :)"
-
-  utter_wrong_business:
-    - text: "当前还不支持{business}业务，请重新输入。"
-
-  utter_wrong_type:
-    - text: "当前还不支持查询{type}。"
-
-  utter_wrong_number:
-    - text: "您输入的{number}有误，请重新输入。"
-
-  utter_chitchat:
-    - text: "呃呃呃呃呃"
-    - text: "您这是在尬聊吗？"
