@@ -18,7 +18,7 @@ def time_finder(str_date):
     
     for year_month_day_pattern in year_month_day_pattern_list:
         try:
-            ymd_date = time.strptime(str_date, year_month_day_pattern)
+            ymd_date = time.strptime(str_date.strip(), year_month_day_pattern)
         except:
             continue
     if ymd_date is not None:
@@ -26,7 +26,7 @@ def time_finder(str_date):
     
     for month_day_pattern in month_day_pattern_list:
         try:
-            md_date = time.strptime(str_date, month_day_pattern)
+            md_date = time.strptime(str_date.strip(), month_day_pattern)
         except:
             continue
     if md_date is not None:

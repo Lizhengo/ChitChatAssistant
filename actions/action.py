@@ -6,13 +6,7 @@ from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormAction
 from utils.utils import time_finder
 import re
-
-from requests import (
-    ConnectionError,
-    HTTPError,
-    TooManyRedirects,
-    Timeout
-)
+from actions.TripApis import get_trip_hotel, get_trip_flight
 
 
 class TripForm(FormAction):
@@ -121,12 +115,12 @@ class TripForm(FormAction):
         if start_time is not None:
             return {"start_time": start_time}
         else:
-            match_time = time_finder(value)
+            match_time = time_finder(value.strip())
             if match_time is None:
                 intent = tracker.latest_message['intent'].get('name')
-                if intent == "time_inform":
+                if intent != "request_trip":
                     dispatcher.utter_template('utter_wrong_start_time', tracker)
-                return {"type": None}
+                return {"start_time": None}
             else:
                 return {"start_time": match_time}
     
@@ -142,12 +136,12 @@ class TripForm(FormAction):
         if end_time is not None:
             return {"end_time": end_time}
         else:
-            match_time = time_finder(value)
+            match_time = time_finder(value.strip())
             if match_time is None:
                 intent = tracker.latest_message['intent'].get('name')
-                if intent == "time_inform":
+                if intent != "request_trip":
                     dispatcher.utter_template('utter_wrong_end_time', tracker)
-                return {"type": None}
+                return {"end_time": None}
             else:
                 return {"end_time": match_time}
     
@@ -164,7 +158,11 @@ class TripForm(FormAction):
         if start_address is not None:
             return {"start_address": start_address}
         else:
-            return {"start_address": value}
+            if value.strip() != "":
+                return {"end_address": value.strip()}
+            else:
+                dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+                return {"end_address": None}
     
     def validate_end_address(
         self,
@@ -179,8 +177,27 @@ class TripForm(FormAction):
         if end_address is not None:
             return {"end_address": end_address}
         else:
-            return {"end_address": value}
+            if value.strip() != "":
+                return {"end_address": value.strip()}
+            else:
+                dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+                return {"end_address": None}
     
+    def validate_task(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate task."""
+        
+        if value.strip() != "":
+            return {"task": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"task": None}
+        
     def validate_type(
         self,
         value: Text,
@@ -190,8 +207,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate type value."""
         
-        if value in self.type_db():
-            return {"type": value}
+        if value.strip() in self.type_db():
+            return {"type": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_trip_type', tracker)
             return {"type": None}
@@ -205,8 +222,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate baoxiaodiqu value."""
         
-        if value in self.baoxiaodiqu_db():
-            return {"baoxiaodiqu": value}
+        if value.strip() in self.baoxiaodiqu_db():
+            return {"baoxiaodiqu": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_baoxiaodiqu', tracker)
             return {"baoxiaodiqu": None}
@@ -220,8 +237,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate tiaoxian."""
         
-        if value in self.tiaoxian_db():
-            return {"tiaoxian": value}
+        if value.strip() in self.tiaoxian_db():
+            return {"tiaoxian": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_tiaoxian', tracker)
             return {"tiaoxian": None}
@@ -235,8 +252,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate baoxiaobumen."""
 
-        if value in self.baoxiaobumen_db():
-            return {"baoxiaobumen": value}
+        if value.strip() in self.baoxiaobumen_db():
+            return {"baoxiaobumen": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_baoxiaobumen', tracker)
             return {"baoxiaobumen": None}
@@ -250,8 +267,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate receive."""
         
-        if value in self.receive_db():
-            return {"receive": value}
+        if value.strip() in self.receive_db():
+            return {"receive": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_receive', tracker)
             return {"receive": None}
@@ -265,8 +282,8 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate person_level."""
         
-        if value in self.person_level_db():
-            return {"person_level": value}
+        if value.strip() in self.person_level_db():
+            return {"person_level": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_person_level', tracker)
             return {"person_level": None}
@@ -280,12 +297,57 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate chengjicishu."""
         
-        if re.match("[0-9]+$", value):
-            return {"chengjicishu": value}
+        if re.match("[0-9]+$", value.strip()):
+            return {"chengjicishu": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_chengjicishu', tracker)
             return {"chengjicishu": None}
     
+    def validate_ruzhudi(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate ruzhudi."""
+        
+        if value.strip() != "":
+            return {"ruzhudi": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"ruzhudi": None}
+        
+    def validate_chuxingren(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate chuxingren."""
+        
+        if value.strip() != "":
+            return {"chuxingren": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"chuxingren": None}
+    
+    def validate_item(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate item."""
+        
+        if value.strip() != "":
+            return {"item": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"item": None}
+        
     def validate_it_item_num(
         self,
         value: Text,
@@ -295,10 +357,10 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate it_item_num."""
         
-        if value == "无":
-            return {"it_item_num": value}
-        if re.match("[A-Z]+\[[0-9]{4}\][0-9]+$", value):
-            return {"it_item_num": value}
+        if value.strip() == "无":
+            return {"it_item_num": value.strip()}
+        if re.match("[A-Z]+\[[0-9]{4}\][0-9]+$", value.strip()):
+            return {"it_item_num": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_it_item_num', tracker)
             return {"it_item_num": None}
@@ -312,10 +374,10 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate fin_item_num."""
         
-        if value == "无":
-            return {"fin_item_num": value}
-        if re.match("[0-9]{13}$",value):
-            return {"fin_item_num": value}
+        if value.strip() == "无":
+            return {"fin_item_num": value.strip()}
+        if re.match("[0-9]{13}$",value.strip()):
+            return {"fin_item_num": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_fin_item_num', tracker)
             return {"fin_item_num": None}
@@ -342,7 +404,7 @@ class TripForm(FormAction):
             ), self.from_text(not_intent=["stop"])],
             "end_address": [
                 self.from_entity(
-                    entity="start_address", intent=["request_trip"]
+                    entity="end_address", intent=["request_trip"]
             ), self.from_text(not_intent=["stop"])],
             "task": self.from_text(not_intent=["stop"]),
             "item": self.from_text(not_intent=["stop"]),
@@ -358,7 +420,8 @@ class TripForm(FormAction):
                                            self.from_text(not_intent=["stop"])],
             "receive": [self.from_entity(entity="receive", intent=["choose_inform"]),
                         self.from_intent(intent="affirm", value="是"),
-                        self.from_intent(intent="deny", value="否")],
+                        self.from_intent(intent="deny", value="否"),
+                        self.from_text(not_intent=["stop"])],
             "ruzhudi": self.from_text(not_intent=["stop"]),
             "chengjicishu": self.from_text(not_intent=["stop"]),
             "chuxingren": self.from_text(not_intent=["stop"]),
@@ -443,11 +506,42 @@ class JiaobanForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate nextnode."""
         
-        if value in self.nextnode_db():
-            return {"nextnode": value}
+        if value.strip() in self.nextnode_db():
+            return {"nextnode": value.strip()}
         else:
             dispatcher.utter_template('utter_wrong_nextnode', tracker)
             return {"nextnode": None}
+        
+    def validate_nextperson(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate nextperson."""
+        
+        if value.strip() != "":
+            return {"nextperson": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"nextperson": None}
+        
+    def validate_banliyijian(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate banliyijian."""
+        
+        if value.strip() != "":
+            return {"banliyijian": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_empty_answer', tracker)
+            return {"banliyijian": None}
+        
         
     @staticmethod
     def required_slots(tracker: Tracker) -> List[Text]:
@@ -488,7 +582,7 @@ class JiaobanForm(FormAction):
                         请确认是否交办？""".format(
                      banliyijian, nextnode, nextperson))
         return []
-    
+  
 class ActionDefaultFallback(Action):
     """Executes the fallback action and goes back to the previous state
     of the dialogue"""
@@ -503,8 +597,7 @@ class ActionDefaultFallback(Action):
     
     
 class ActionTripJiaoban(Action):
-    """Executes the trip jiaoban action and goes back to the previous state
-    of the dialogue"""
+    """Executes the trip jiaoban action"""
 
     def name(self):
         return 'action_trip_jiaoban'
@@ -512,13 +605,38 @@ class ActionTripJiaoban(Action):
     def run(self, dispatcher, tracker, domain):
 
         dispatcher.utter_template('utter_jiaoban_success', tracker)
-        return [SlotSet("start_time", None), SlotSet("end_time", None),
-                SlotSet("start_address", None), SlotSet("end_address", None),
-                SlotSet("task", None), SlotSet("item", None), 
-                SlotSet("it_item_num", None),SlotSet("fin_item_num", None),
-                SlotSet("type", None), SlotSet("baoxiaodiqu", None), 
-                SlotSet("tiaoxian", None), SlotSet("baoxiaobumen", None), 
-                SlotSet("receive", None), SlotSet("ruzhudi", None), 
-                SlotSet("chengjicishu", None), SlotSet("chuxingren", None),
-                SlotSet("person_level", None), SlotSet("banliyijian", None), 
-                SlotSet("nextnode", None), SlotSet("nextperson", None)]
+        return []
+        
+        
+class ActionTripHotelRecommend(Action):
+    """Executes the trip hotel recommend"""
+
+    def name(self):
+        return 'action_trip_hotel_recommend'
+
+    def run(self, dispatcher, tracker, domain):
+        ruzhudi = tracker.get_slot('ruzhudi')
+        
+        hotel = get_trip_hotel(ruzhudi)
+        if hotel is not None:
+            dispatcher.utter_message(hotel)
+        return []
+        
+    
+class ActionTripFlightRecommend(Action):
+    """Executes the trip flight recommend"""
+
+    def name(self):
+        return 'action_trip_flight_recommend'
+
+    def run(self, dispatcher, tracker, domain):
+        start_time = tracker.get_slot('start_time')
+        end_time = tracker.get_slot('end_time')
+        start_address = tracker.get_slot('start_address')
+        end_address = tracker.get_slot('end_address')
+        
+        flight = get_trip_flight(start_time, end_time, 
+                                 start_address, end_address)
+        if flight is not None:
+            dispatcher.utter_message(flight)
+        return []

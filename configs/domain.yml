@@ -108,6 +108,7 @@ actions:
   - utter_answer_thanks
   - utter_answer_whoareyou
   - utter_answer_whattodo
+  - utter_answer_abandon
   - utter_ask_start_time
   - utter_ask_start_address
   - utter_ask_end_time
@@ -143,8 +144,15 @@ actions:
   - utter_wrong_nextnode
   - utter_wrong_person_level
   - utter_wrong_chengjicishu
+  - utter_wrong_empty_answer
+  - utter_jiaoban_success
+  - utter_trip_hotel_recommend
+  - utter_trip_flight_recommend
   - action_default_fallback
   - action_trip_jiaoban
+  - action_trip_hotel_recommend
+  - action_trip_flight_recommend
+  
 
 forms:
   - trip_form
@@ -171,7 +179,10 @@ responses:
   utter_answer_deny:
     - text: "主人，您不开心吗？不要离开我哦"
     - text: "怎么了，主人？"
-
+  
+  utter_answer_abandon:
+    - text: "已为您放弃本次申请。"
+    
   utter_answer_thanks:
     - text: "嗯呢。不用客气~"
     - text: "这是我应该做的，主人~"
@@ -348,12 +359,18 @@ responses:
   utter_jiaoban_success:
     - text: "已帮您交办了~"
   
+  utter_trip_hotel_recommend:
+    - text: "帮您推荐入住地 {ruzhudi} 的协议酒店如下:"
+    
+  utter_trip_flight_recommend:
+    - text: "帮您推荐 {start_time} 到 {end_time}, 从 {start_address} 到 {end_address} 的飞机行程如下:"
+  
   utter_wrong_start_time:
     - text: "请输入合法的出差起始日期，如（2020-06-09）"
   
   utter_wrong_end_time:
     - text: "请输入合法的出差结束日期，如（2020-06-09）"
-    
+
   utter_wrong_start_address:
     - text: "请输入合法的差旅出发地"
   
@@ -389,6 +406,9 @@ responses:
   
   utter_wrong_chengjicishu:
     - text: "请输入正确的乘机次数，数字即可"
+    
+  utter_wrong_empty_answer:
+    - text: "不可输入空白信息"
     
   utter_ask_continue:
     - text: "请问您还要继续吗?"
