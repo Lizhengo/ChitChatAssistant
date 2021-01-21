@@ -17,6 +17,10 @@ session_config:
   session_expiration_time: 60
 
 slots:
+  first_request:
+    type: bool
+    initial_value: True
+    auto_fill: false
   start_time:
     type: unfeaturized
     auto_fill: false
@@ -79,6 +83,7 @@ slots:
     auto_fill: false
 
 entities:
+  - first_request
   - start_time
   - end_time
   - start_address
@@ -109,6 +114,7 @@ actions:
   - utter_answer_whoareyou
   - utter_answer_whattodo
   - utter_answer_abandon
+  - utter_answer_request
   - utter_ask_start_time
   - utter_ask_start_address
   - utter_ask_end_time
@@ -151,8 +157,8 @@ actions:
   - action_default_fallback
   - action_trip_jiaoban
   - action_trip_hotel_recommend
-  - action_trip_flight_recommend
-  
+  - action_trip_flight_recommend  
+  - action_answer_request
 
 forms:
   - trip_form
@@ -193,6 +199,9 @@ responses:
 
   utter_answer_whattodo:
     - text: "您好！很高兴为您服务，我目前支持差旅申请哦。"
+    
+  utter_answer_request:
+    - text: "好的，请按提示完善差旅信息。"
     
   utter_ask_start_time:
     - text: "请输入您的出差起始日期，如（2020-06-09）"

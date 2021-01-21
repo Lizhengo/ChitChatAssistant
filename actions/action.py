@@ -112,6 +112,7 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate start_time value."""
         start_time = tracker.get_slot('start_time')
+        
         if start_time is not None:
             return {"start_time": start_time}
         else:
@@ -133,6 +134,7 @@ class TripForm(FormAction):
     ) -> Dict[Text, Any]:
         """Validate end_time value."""
         end_time = tracker.get_slot('end_time')
+        
         if end_time is not None:
             return {"end_time": end_time}
         else:
@@ -583,6 +585,7 @@ class JiaobanForm(FormAction):
                      banliyijian, nextnode, nextperson))
         return []
   
+    
 class ActionDefaultFallback(Action):
     """Executes the fallback action and goes back to the previous state
     of the dialogue"""
@@ -594,8 +597,23 @@ class ActionDefaultFallback(Action):
 
         dispatcher.utter_template('utter_default', tracker, silent_fail=True)
         return [UserUtteranceReverted()]
+
+
+class ActionAnswerRequest(Action):
+    """Executes the answer request action"""
+
+    def name(self):
+        return 'action_answer_request'
+
+    def run(self, dispatcher, tracker, domain):
+        first_request = tracker.get_slot('first_request')
+        if not first_request:
+            return []
+        dispatcher.utter_template('utter_answer_request', tracker)
+        
+        return [SlotSet('first_request', False)]
     
-    
+
 class ActionTripJiaoban(Action):
     """Executes the trip jiaoban action"""
 
@@ -620,6 +638,7 @@ class ActionTripHotelRecommend(Action):
         hotel = get_trip_hotel(ruzhudi)
         if hotel is not None:
             dispatcher.utter_message(hotel)
+        dispatcher.utter_template('utter_trip_hotel_recommend', tracker)
         return []
         
     
@@ -639,4 +658,5 @@ class ActionTripFlightRecommend(Action):
                                  start_address, end_address)
         if flight is not None:
             dispatcher.utter_message(flight)
+        dispatcher.utter_template('utter_trip_flight_recommend', tracker)
         return []
