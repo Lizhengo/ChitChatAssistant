@@ -1,7 +1,7 @@
 from typing import Dict, Text, Any, List, Union
 
 from rasa_sdk import Tracker, Action
-from rasa_sdk.events import UserUtteranceReverted, Restarted, SlotSet
+from rasa_sdk.events import UserUtteranceReverted, Restarted, SlotSet, AllSlotsReset
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormAction
 from utils.utils import time_finder
@@ -83,6 +83,16 @@ class TripForm(FormAction):
             "是",
             "否",
         ]
+    
+    def nextnode_db(self) -> List[Text]:
+        """Database of supported nextnode"""
+
+        return [
+            "处室负责人审核",
+            "部门成员办理",
+            "部门负责人审核",
+            "办理",
+        ]
         
     def person_level_db(self) -> List[Text]:
         """Database of supported person level"""
@@ -97,11 +107,12 @@ class TripForm(FormAction):
     @staticmethod
     def required_slots(tracker: Tracker) -> List[Text]:
         """A list of required slots that the form has to fill"""
-
+        
         return ["start_time", "end_time", "start_address", "end_address",
                 "chuxingren", "person_level", "chengjicishu", "ruzhudi",
                 "task", "item", "it_item_num", "fin_item_num", "type", 
-                "baoxiaodiqu", "tiaoxian", "baoxiaobumen", "receive"]
+                "baoxiaodiqu", "tiaoxian", "baoxiaobumen", "receive",
+                "banliyijian", "nextnode", "nextperson"]
     
     def validate_start_time(
         self,
@@ -111,6 +122,8 @@ class TripForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate start_time value."""
+        if isinstance(value, list):
+            value = value[0]
         start_time = tracker.get_slot('start_time')
         
         if start_time is not None:
@@ -133,6 +146,8 @@ class TripForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate end_time value."""
+        if isinstance(value, list):
+            value = value[0]
         end_time = tracker.get_slot('end_time')
         
         if end_time is not None:
@@ -155,16 +170,18 @@ class TripForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate start_address value."""
+        if isinstance(value, list):
+            value = value[0]
         start_address = tracker.get_slot('start_address')
 
         if start_address is not None:
             return {"start_address": start_address}
         else:
             if value.strip() != "":
-                return {"end_address": value.strip()}
+                return {"start_address": value.strip()}
             else:
                 dispatcher.utter_template('utter_wrong_empty_answer', tracker)
-                return {"end_address": None}
+                return {"start_address": None}
     
     def validate_end_address(
         self,
@@ -174,6 +191,8 @@ class TripForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         """Validate end_address value."""
+        if isinstance(value, list):
+            value = value[0]
         end_address = tracker.get_slot('end_address')
         
         if end_address is not None:
@@ -384,121 +403,6 @@ class TripForm(FormAction):
             dispatcher.utter_template('utter_wrong_fin_item_num', tracker)
             return {"fin_item_num": None}
     
-    def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
-        """A dictionary to map required slots to
-            - an extracted entity
-            - intent: value pairs
-            - a whole message
-            or a list of them, where a first match will be picked"""
-
-        return {
-            "start_time": [
-                self.from_entity(
-                    entity="start_time", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
-            "end_time": [
-                self.from_entity(
-                    entity="end_time", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
-            "start_address": [
-                self.from_entity(
-                    entity="start_address", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
-            "end_address": [
-                self.from_entity(
-                    entity="end_address", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
-            "task": self.from_text(not_intent=["stop"]),
-            "item": self.from_text(not_intent=["stop"]),
-            "it_item_num": self.from_text(not_intent=["stop"]),
-            "fin_item_num": self.from_text(not_intent=["stop"]),
-            "type": [self.from_entity(entity="type", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "tiaoxian": [self.from_entity(entity="tiaoxian", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "baoxiaobumen": [self.from_entity(entity="baoxiaobumen", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "baoxiaodiqu": [self.from_entity(entity="baoxiaodiqu", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "receive": [self.from_entity(entity="receive", intent=["choose_inform"]),
-                        self.from_intent(intent="affirm", value="是"),
-                        self.from_intent(intent="deny", value="否"),
-                        self.from_text(not_intent=["stop"])],
-            "ruzhudi": self.from_text(not_intent=["stop"]),
-            "chengjicishu": self.from_text(not_intent=["stop"]),
-            "chuxingren": self.from_text(not_intent=["stop"]),
-            "person_level": [self.from_entity(entity="person_level", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-        }
-    
-    def submit(
-            self,
-            dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any],
-    ) -> List[Dict]:
-        """Define what the form has to do
-            after all required slots are filled"""
-        start_address = tracker.get_slot('start_address')
-        end_address = tracker.get_slot('end_address')
-        start_time = tracker.get_slot('start_time')
-        end_time = tracker.get_slot('end_time')
-        task = tracker.get_slot('task')
-        item = tracker.get_slot('item')
-        it_item_num = tracker.get_slot('it_item_num')
-        fin_item_num = tracker.get_slot('fin_item_num')
-        trip_type = tracker.get_slot('type')
-        baoxiaodiqu = tracker.get_slot('baoxiaodiqu')
-        tiaoxian = tracker.get_slot('tiaoxian')
-        baoxiaobumen = tracker.get_slot('baoxiaobumen')
-        receive = tracker.get_slot('receive')
-        ruzhudi = tracker.get_slot('ruzhudi')
-        chengjicishu = tracker.get_slot('chengjicishu')
-        person_level = tracker.get_slot('person_level')
-        chuxingren = tracker.get_slot('chuxingren')
-    
-        dispatcher.utter_message(
-                text="""差旅申请信息如下:
-                        出差行程:{} - {},
-                        出差时间:{} - {},
-                        乘机次数:{},
-                        出行人:{},
-                        出行人行员等级: {},
-                        入住地:{},
-                        出行任务:{},
-                        项目:{},
-                        IT综合管理平台项目编号:{},
-                        财务项目编号:{},
-                        出差类型:{},
-                        报销地区:{},
-                        报销部门:{},
-                        条线:{},
-                        有无接待:{},
-                        请确认是否进行文件办理？""".format(
-                start_address, end_address, start_time, end_time, 
-                chengjicishu, chuxingren, person_level, ruzhudi, 
-                task, item, it_item_num, fin_item_num, trip_type, 
-                baoxiaodiqu, baoxiaobumen, tiaoxian, receive))
-        return []
-
-
-class JiaobanForm(FormAction):
-
-    def name(self) -> Text:
-        """Unique identifier of the form"""
-
-        return "jiaoban_form"
-    
-    def nextnode_db(self) -> List[Text]:
-        """Database of supported nextnode"""
-
-        return [
-            "处室负责人审核",
-            "部门成员办理",
-            "部门负责人审核",
-            "办理",
-        ]
-    
     def validate_nextnode(
         self,
         value: Text,
@@ -544,13 +448,6 @@ class JiaobanForm(FormAction):
             dispatcher.utter_template('utter_wrong_empty_answer', tracker)
             return {"banliyijian": None}
         
-        
-    @staticmethod
-    def required_slots(tracker: Tracker) -> List[Text]:
-        """A list of required slots that the form has to fill"""
-
-        return ["banliyijian", "nextnode", "nextperson"]
-    
     def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
         """A dictionary to map required slots to
             - an extracted entity
@@ -559,6 +456,43 @@ class JiaobanForm(FormAction):
             or a list of them, where a first match will be picked"""
 
         return {
+            "start_time": [
+                self.from_entity(
+                    entity="start_time", intent=["request_trip"]
+            ), self.from_text(not_intent=["stop"])],
+            "end_time": [
+                self.from_entity(
+                    entity="end_time", intent=["request_trip"]
+            ), self.from_text(not_intent=["stop"])],
+            "start_address": [
+                self.from_entity(
+                    entity="start_address", intent=["request_trip"]
+            ), self.from_text(not_intent=["stop"])],
+            "end_address": [
+                self.from_entity(
+                    entity="end_address", intent=["request_trip"]
+            ), self.from_text(not_intent=["stop"])],
+            "task": self.from_text(not_intent=["stop"]),
+            "item": self.from_text(not_intent=["stop"]),
+            "it_item_num": self.from_text(not_intent=["stop"]),
+            "fin_item_num": self.from_text(not_intent=["stop"]),
+            "type": [self.from_entity(entity="type", intent=["choose_inform"]),
+                                           self.from_text(not_intent=["stop"])],
+            "tiaoxian": [self.from_entity(entity="tiaoxian", intent=["choose_inform"]),
+                                           self.from_text(not_intent=["stop"])],
+            "baoxiaobumen": [self.from_entity(entity="baoxiaobumen", intent=["choose_inform"]),
+                                           self.from_text(not_intent=["stop"])],
+            "baoxiaodiqu": [self.from_entity(entity="baoxiaodiqu", intent=["choose_inform"]),
+                                           self.from_text(not_intent=["stop"])],
+            "receive": [self.from_entity(entity="receive", intent=["choose_inform"]),
+                        self.from_intent(intent="affirm", value="是"),
+                        self.from_intent(intent="deny", value="否"),
+                        self.from_text(not_intent=["stop"])],
+            "ruzhudi": self.from_text(not_intent=["stop"]),
+            "chengjicishu": self.from_text(not_intent=["stop"]),
+            "chuxingren": self.from_text(not_intent=["stop"]),
+            "person_level": [self.from_entity(entity="person_level", intent=["choose_inform"]),
+                                           self.from_text(not_intent=["stop"])],
             "banliyijian": self.from_text(not_intent=["stop"]),
             "nextnode": [self.from_entity(entity="nextnode", intent=["choose_inform"]),
                                            self.from_text(not_intent=["stop"])],
@@ -573,18 +507,116 @@ class JiaobanForm(FormAction):
     ) -> List[Dict]:
         """Define what the form has to do
             after all required slots are filled"""
+        start_address = tracker.get_slot('start_address')
+        end_address = tracker.get_slot('end_address')
+        start_time = tracker.get_slot('start_time')
+        end_time = tracker.get_slot('end_time')
+        task = tracker.get_slot('task')
+        item = tracker.get_slot('item')
+        it_item_num = tracker.get_slot('it_item_num')
+        fin_item_num = tracker.get_slot('fin_item_num')
+        trip_type = tracker.get_slot('type')
+        baoxiaodiqu = tracker.get_slot('baoxiaodiqu')
+        tiaoxian = tracker.get_slot('tiaoxian')
+        baoxiaobumen = tracker.get_slot('baoxiaobumen')
+        receive = tracker.get_slot('receive')
+        ruzhudi = tracker.get_slot('ruzhudi')
+        chengjicishu = tracker.get_slot('chengjicishu')
+        person_level = tracker.get_slot('person_level')
+        chuxingren = tracker.get_slot('chuxingren')
         banliyijian = tracker.get_slot('banliyijian')
         nextnode = tracker.get_slot('nextnode')
         nextperson = tracker.get_slot('nextperson')
+        
         dispatcher.utter_message(
-                text="""差旅申请交办信息如下:
+                text="""差旅申请信息如下:
+                        出差行程:{} - {},
+                        出差时间:{} - {},
+                        乘机次数:{},
+                        出行人:{},
+                        出行人行员等级: {},
+                        入住地:{},
+                        出行任务:{},
+                        项目:{},
+                        IT综合管理平台项目编号:{},
+                        财务项目编号:{},
+                        出差类型:{},
+                        报销地区:{},
+                        报销部门:{},
+                        条线:{},
+                        有无接待:{},
                         办理意见:{},
                         下一处理步骤:{},
                         下一处理人:{},
-                        请确认是否交办？""".format(
-                     banliyijian, nextnode, nextperson))
+                        """.format(
+                start_address, end_address, start_time, end_time, 
+                chengjicishu, chuxingren, person_level, ruzhudi, 
+                task, item, it_item_num, fin_item_num, trip_type, 
+                baoxiaodiqu, baoxiaobumen, tiaoxian, receive,
+                banliyijian, nextnode, nextperson))
         return []
-  
+    
+
+class AffirmForm(FormAction):
+
+    def name(self) -> Text:
+        """Unique identifier of the form"""
+
+        return "affirm_form"
+    
+    def is_affirm_db(self) -> List[Text]:
+        """Database of supported nextnode"""
+
+        return [
+            "是",
+            "否",
+        ]
+    
+    def validate_is_affirm(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate affirm."""
+        
+        if value.strip() in self.is_affirm_db():
+            return {"is_affirm": value.strip()}
+        else:
+            dispatcher.utter_template('utter_wrong_is_affirm', tracker)
+            return {"is_affirm": None}
+        
+    @staticmethod
+    def required_slots(tracker: Tracker) -> List[Text]:
+        """A list of required slots that the form has to fill"""
+        
+        return ["is_affirm"]
+        
+        
+    def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
+        """A dictionary to map required slots to
+            - an extracted entity
+            - intent: value pairs
+            - a whole message
+            or a list of them, where a first match will be picked"""
+
+        return {
+            "is_affirm": [self.from_entity(entity="is_affirm", intent=["choose_inform"]),
+                        self.from_intent(intent="affirm", value="是"),
+                        self.from_intent(intent=["deny", "stop"], value="否"),
+                        self.from_text()],
+        }
+    
+    def submit(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict]:
+        """Define what the form has to do
+            after all required slots are filled"""
+        return []
     
 class ActionDefaultFallback(Action):
     """Executes the fallback action and goes back to the previous state
@@ -599,21 +631,6 @@ class ActionDefaultFallback(Action):
         return [UserUtteranceReverted()]
 
 
-class ActionAnswerRequest(Action):
-    """Executes the answer request action"""
-
-    def name(self):
-        return 'action_answer_request'
-
-    def run(self, dispatcher, tracker, domain):
-        first_request = tracker.get_slot('first_request')
-        if not first_request:
-            return []
-        dispatcher.utter_template('utter_answer_request', tracker)
-        
-        return [SlotSet('first_request', False)]
-    
-
 class ActionTripJiaoban(Action):
     """Executes the trip jiaoban action"""
 
@@ -621,11 +638,16 @@ class ActionTripJiaoban(Action):
         return 'action_trip_jiaoban'
 
     def run(self, dispatcher, tracker, domain):
-
-        dispatcher.utter_template('utter_jiaoban_success', tracker)
+        is_affirm = tracker.get_slot('is_affirm')
+        if is_affirm is None:
+            return []
+        if is_affirm == "否":
+            dispatcher.utter_template('utter_answer_abandon', tracker)
+        else:
+            dispatcher.utter_template('utter_jiaoban_success', tracker)
         return []
         
-        
+
 class ActionTripHotelRecommend(Action):
     """Executes the trip hotel recommend"""
 
@@ -633,8 +655,11 @@ class ActionTripHotelRecommend(Action):
         return 'action_trip_hotel_recommend'
 
     def run(self, dispatcher, tracker, domain):
-        ruzhudi = tracker.get_slot('ruzhudi')
+        is_affirm = tracker.get_slot('is_affirm')
+        if is_affirm == "否" or is_affirm is None:
+            return []
         
+        ruzhudi = tracker.get_slot('ruzhudi')
         hotel = get_trip_hotel(ruzhudi)
         if hotel is not None:
             dispatcher.utter_message(hotel)
@@ -649,6 +674,10 @@ class ActionTripFlightRecommend(Action):
         return 'action_trip_flight_recommend'
 
     def run(self, dispatcher, tracker, domain):
+        is_affirm = tracker.get_slot('is_affirm')
+        if is_affirm == "否" or is_affirm is None:
+            return []
+        
         start_time = tracker.get_slot('start_time')
         end_time = tracker.get_slot('end_time')
         start_address = tracker.get_slot('start_address')

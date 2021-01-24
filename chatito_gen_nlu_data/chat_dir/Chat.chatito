@@ -1,0 +1,136 @@
+%[greet]('training': '100')
+    ~[greet]
+
+%[goodbye]('training': '100')
+    ~[goodbye]
+
+%[whoareyou]('training': '100')
+    ~[whoareyou]
+
+%[whattodo]('training': '100')
+    ~[whattodo]
+
+%[thanks]('training': '100')
+    ~[thanks]
+
+%[deny]('training': '100')
+    ~[deny]
+
+%[affirm]('training': '100')
+    ~[affirm]
+
+%[stop]('training': '100')
+    ~[stop]
+
+~[greet]
+    你好
+    你好啊
+    早上好
+    晚上好
+    hello
+    hi
+    嗨
+    嗨喽
+    见到你很高兴
+    嘿
+    早
+    上午好
+    hello哈喽
+    哈喽哈喽
+    hello hello
+    喂喂
+
+~[goodbye]
+    goodbye
+    bye
+    bye bye
+    再见
+    拜
+    拜拜
+    拜拜，下次再聊
+    下次见
+    回头见
+    下次再见
+    下次再聊
+    有空再聊
+    先这样吧
+    好了，就说这么多了
+    好了，先这样
+    没事
+
+~[whoareyou]
+    你是谁
+    我知道你吗
+    谁
+    我认识你吗
+    这是谁啊
+    是谁
+    请问你是谁
+    请问我认识你吗
+    你是哪位
+    你是？
+    是谁？
+    可以告诉我你的名字吗
+    你叫什么名字
+
+~[whattodo]
+    你支持什么功能
+    你有什么功能
+    你能干什么
+    你能做什么
+
+~[thanks]
+    谢谢
+    thanks
+    thank you
+    真的太感谢你了，帮了我大忙
+    谢谢你帮了我大忙
+    你帮了我大忙，谢谢你
+    非常感谢
+    谢了
+
+~[deny]
+    不了
+    算了
+    不用了
+    不需要
+    不
+    no
+    不可以
+    不是的
+    否定
+    否
+    不是
+    不同意
+    不好
+    拒绝
+    不行
+    无
+    没有了
+    没有
+
+~[affirm]
+    是的
+    是
+    yes
+    当然
+    好的
+    ok
+    嗯
+    可以
+    同意
+    确认
+    是这样的
+    对的
+    好滴
+    行
+
+~[stop]
+    停止申请
+    重来
+    重置对话
+    重新来
+    重新申请
+    不办了
+    我不办了
+    不申请了

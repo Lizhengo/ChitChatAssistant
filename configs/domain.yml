@@ -17,10 +17,6 @@ session_config:
   session_expiration_time: 60
 
 slots:
-  first_request:
-    type: bool
-    initial_value: True
-    auto_fill: false
   start_time:
     type: unfeaturized
     auto_fill: false
@@ -81,9 +77,11 @@ slots:
   nextperson:
     type: unfeaturized
     auto_fill: false
+  is_affirm:
+    type: unfeaturized
+    auto_fill: false
 
 entities:
-  - first_request
   - start_time
   - end_time
   - start_address
@@ -104,17 +102,18 @@ entities:
   - banliyijian
   - nextnode
   - nextperson
+  - is_affirm
 
 actions:
   - utter_answer_affirm
   - utter_answer_deny
+  - utter_answer_stop
   - utter_answer_greet
   - utter_answer_goodbye
   - utter_answer_thanks
   - utter_answer_whoareyou
   - utter_answer_whattodo
   - utter_answer_abandon
-  - utter_answer_request
   - utter_ask_start_time
   - utter_ask_start_address
   - utter_ask_end_time
@@ -135,7 +134,9 @@ actions:
   - utter_ask_banliyijian
   - utter_ask_nextnode
   - utter_ask_nextperson
-  - utter_ask_wheather_trip
+  - utter_ask_is_affirm
+  - utter_ask_abandon
+  - utter_ask_continue
   - utter_wrong_start_time
   - utter_wrong_end_time
   - utter_wrong_start_address
@@ -151,18 +152,18 @@ actions:
   - utter_wrong_person_level
   - utter_wrong_chengjicishu
   - utter_wrong_empty_answer
+  - utter_wrong_is_affirm
   - utter_jiaoban_success
   - utter_trip_hotel_recommend
   - utter_trip_flight_recommend
   - action_default_fallback
   - action_trip_jiaoban
   - action_trip_hotel_recommend
-  - action_trip_flight_recommend  
-  - action_answer_request
+  - action_trip_flight_recommend
 
 forms:
   - trip_form
-  - jiaoban_form
+  - affirm_form
 
 responses:
   utter_answer_affirm:
@@ -185,9 +186,13 @@ responses:
   utter_answer_deny:
     - text: "主人，您不开心吗？不要离开我哦"
     - text: "怎么了，主人？"
+    
+  utter_answer_stop:
+    - text: "您当前没有正在进行的差旅申请哦"
+    - text: "怎么了，主人？"
   
   utter_answer_abandon:
-    - text: "已为您放弃本次申请。"
+    - text: "已为您放弃本次差旅申请。"
     
   utter_answer_thanks:
     - text: "嗯呢。不用客气~"
@@ -200,9 +205,6 @@ responses:
   utter_answer_whattodo:
     - text: "您好！很高兴为您服务，我目前支持差旅申请哦。"
     
-  utter_answer_request:
-    - text: "好的，请按提示完善差旅信息。"
-    
   utter_ask_start_time:
     - text: "请输入您的出差起始日期，如（2020-06-09）"
   
@@ -214,7 +216,7 @@ responses:
   
   utter_ask_end_address:
     - text: "请输入您的差旅目的地"
-
+    
   utter_ask_task:
     - text: "请输入您的出行任务"
     
@@ -362,6 +364,14 @@ responses:
   utter_ask_nextperson:
     - text: "请输入下一处理人姓名与node_id（英文逗号分隔），如: 张三, 011111"
     
+  utter_ask_is_affirm:
+    - text: "确认进行交办吗？"
+      buttons:
+        - title: "是"
+          payload: '/choose_inform{"is_affirm": "是"}'
+        - title: "否"
+          payload: '/choose_inform{"is_affirm": "否"}'
+    
   utter_default:
     - text: "没听懂，请换种说法吧~"
   
@@ -375,16 +385,16 @@ responses:
     - text: "帮您推荐 {start_time} 到 {end_time}, 从 {start_address} 到 {end_address} 的飞机行程如下:"
   
   utter_wrong_start_time:
-    - text: "请输入合法的出差起始日期，如（2020-06-09）"
+    - text: "日期不合法！"
   
   utter_wrong_end_time:
-    - text: "请输入合法的出差结束日期，如（2020-06-09）"
+    - text: "日期不合法！"
 
   utter_wrong_start_address:
-    - text: "请输入合法的差旅出发地"
+    - text: "地点不合法！"
   
   utter_wrong_end_address:
-    - text: "请输入合法的差旅目的地"
+    - text: "地点不合法！"
     
   utter_wrong_trip_type:
     - text: "请按提示选择正确的出差类型"
@@ -402,10 +412,10 @@ responses:
     - text: "请按提示选择正确的报销部门"
     
   utter_wrong_it_item_num:
-    - text: "请正确填写项目呈批件号，例如CP[2019]123"
+    - text: "项目呈批件号不合法！"
     
   utter_wrong_fin_item_num:
-    - text: "请正确填写财务项目编号，13位数字"
+    - text: "财务项目编号不合法！"
     
   utter_wrong_nextnode:
     - text: "请按提示选择正确的下一处理步骤"
@@ -414,19 +424,19 @@ responses:
     - text: "请按提示选择正确的行员等级"
   
   utter_wrong_chengjicishu:
-    - text: "请输入正确的乘机次数，数字即可"
+    - text: "乘机次数不合法！"
     
   utter_wrong_empty_answer:
     - text: "不可输入空白信息"
+  
+  utter_wrong_is_affirm:
+    - text: "请先进行确认是否交办哦。"
     
   utter_ask_continue:
-    - text: "请问您还要继续吗?"
+    - text: "请问您还要继续进行本次差旅申请吗?"
   
   utter_ask_abandon:
     - text: "请问您确定要放弃本次差旅申请吗?"
-    
-  utter_ask_wheather_trip:
-    - text: "请问您是要进行差旅申请吗?"
   
   utter_noworries:
     - text: "不用客气 :)"

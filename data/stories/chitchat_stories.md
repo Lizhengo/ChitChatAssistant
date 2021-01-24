@@ -12,6 +12,10 @@
 * affirm
     - utter_answer_affirm
     
+## say stop 
+* stop
+    - utter_answer_stop
+    
 ## say no with greet
 * greet
     - utter_answer_greet
