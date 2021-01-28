@@ -1,4 +1,4 @@
-from typing import Dict, Text, Any, List, Union
+﻿from typing import Dict, Text, Any, List, Union
 
 from rasa_sdk import Tracker, Action
 from rasa_sdk.events import UserUtteranceReverted, Restarted, SlotSet, AllSlotsReset
@@ -459,44 +459,44 @@ class TripForm(FormAction):
             "start_time": [
                 self.from_entity(
                     entity="start_time", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
+            ), self.from_text(not_intent=["stop", "meeting_book"])],
             "end_time": [
                 self.from_entity(
                     entity="end_time", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
+            ), self.from_text(not_intent=["stop", "meeting_book"])],
             "start_address": [
                 self.from_entity(
                     entity="start_address", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
+            ), self.from_text(not_intent=["stop", "meeting_book"])],
             "end_address": [
                 self.from_entity(
                     entity="end_address", intent=["request_trip"]
-            ), self.from_text(not_intent=["stop"])],
-            "task": self.from_text(not_intent=["stop"]),
-            "item": self.from_text(not_intent=["stop"]),
-            "it_item_num": self.from_text(not_intent=["stop"]),
-            "fin_item_num": self.from_text(not_intent=["stop"]),
+            ), self.from_text(not_intent=["stop", "meeting_book"])],
+            "task": self.from_text(not_intent=["stop", "meeting_book"]),
+            "item": self.from_text(not_intent=["stop", "meeting_book"]),
+            "it_item_num": self.from_text(not_intent=["stop", "meeting_book"]),
+            "fin_item_num": self.from_text(not_intent=["stop", "meeting_book"]),
             "type": [self.from_entity(entity="type", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
             "tiaoxian": [self.from_entity(entity="tiaoxian", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
             "baoxiaobumen": [self.from_entity(entity="baoxiaobumen", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
             "baoxiaodiqu": [self.from_entity(entity="baoxiaodiqu", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
             "receive": [self.from_entity(entity="receive", intent=["choose_inform"]),
                         self.from_intent(intent="affirm", value="是"),
                         self.from_intent(intent="deny", value="否"),
-                        self.from_text(not_intent=["stop"])],
-            "ruzhudi": self.from_text(not_intent=["stop"]),
-            "chengjicishu": self.from_text(not_intent=["stop"]),
-            "chuxingren": self.from_text(not_intent=["stop"]),
+                        self.from_text(not_intent=["stop", "meeting_book"])],
+            "ruzhudi": self.from_text(not_intent=["stop", "meeting_book"]),
+            "chengjicishu": self.from_text(not_intent=["stop", "meeting_book"]),
+            "chuxingren": self.from_text(not_intent=["stop", "meeting_book"]),
             "person_level": [self.from_entity(entity="person_level", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "banliyijian": self.from_text(not_intent=["stop"]),
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
+            "banliyijian": self.from_text(not_intent=["stop", "meeting_book"]),
             "nextnode": [self.from_entity(entity="nextnode", intent=["choose_inform"]),
-                                           self.from_text(not_intent=["stop"])],
-            "nextperson": self.from_text(not_intent=["stop"]),
+                                           self.from_text(not_intent=["stop", "meeting_book"])],
+            "nextperson": self.from_text(not_intent=["stop", "meeting_book"]),
         }
     
     def submit(
@@ -556,6 +556,110 @@ class TripForm(FormAction):
                 banliyijian, nextnode, nextperson))
         return []
     
+class MeetingForm(FormAction):
+            
+    def name(self) -> Text:
+        """Unique identifier of the form"""
+
+        return "meeting_form"
+    
+    @staticmethod
+    def required_slots(tracker: Tracker) -> List[Text]:
+        """A list of required slots that the form has to fill"""
+        
+        return ["meeting_schedule_time", "meeting_start_date", "meeting_end_date",
+                   "meeting_start_time", "meeting_end_time"]
+    
+    def validate_meeting_start_date(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate meeting_start_date value."""
+        if isinstance(value, list):
+            value = value[0]
+        start_time = tracker.get_slot('meeting_start_date')
+        
+        if start_time is not None:
+            return {"start_time": start_time}
+        else:
+            match_time = time_finder(value.strip())
+            if match_time is None:
+                dispatcher.utter_template('utter_wrong_start_time', tracker)
+                return {"start_time": None}
+            else:
+                return {"start_time": match_time}
+    
+    def validate_meeting_end_date(
+        self,
+        value: Text,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        """Validate meeting_end_date value."""
+        if isinstance(value, list):
+            value = value[0]
+        end_time = tracker.get_slot('meeting_end_date')
+        
+        if end_time is not None:
+            return {"end_time": end_time}
+        else:
+            match_time = time_finder(value.strip())
+            if match_time is None:
+                dispatcher.utter_template('utter_wrong_end_time', tracker)
+                return {"end_time": None}
+            else:
+                return {"end_time": match_time}
+    
+    def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
+        """A dictionary to map required slots to
+            - an extracted entity
+            - intent: value pairs
+            - a whole message
+            or a list of them, where a first match will be picked"""
+
+        return {
+            "meeting_schedule_time": [
+                self.from_entity(
+                    entity="meeting_schedule_time", intent=["meeting_book"]
+            ), self.from_text(not_intent=["stop", "request_trip"])],
+            "meeting_start_date": [
+                self.from_text(not_intent=["stop", "request_trip"])],
+            "meeting_end_date": [
+                self.from_text(not_intent=["stop", "request_trip"])],
+            "meeting_start_time": [
+                self.from_text(not_intent=["stop", "request_trip"])],
+            "meeting_end_time": [
+                self.from_text(not_intent=["stop", "request_trip"])],
+        }
+    
+    def submit(
+            self,
+            dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any],
+    ) -> List[Dict]:
+        """Define what the form has to do
+            after all required slots are filled"""
+        schedule_time = tracker.get_slot('meeting_schedule_time')
+        start_date = tracker.get_slot('meeting_start_date')
+        end_date = tracker.get_slot('meeting_end_date')
+        start_time = tracker.get_slot('meeting_start_time')
+        end_time = tracker.get_slot('meeting_end_time')
+        
+        dispatcher.utter_message(
+                text="""会议申请信息如下:
+                        会议日程:{},
+                        会议日期:{} - {},
+                        会议时间:{} - {}
+                        """.format(
+                schedule_time, start_date, end_date, 
+                start_time, end_time))
+        return []
+
 
 class AffirmForm(FormAction):
 
@@ -647,6 +751,23 @@ class ActionTripJiaoban(Action):
             dispatcher.utter_template('utter_jiaoban_success', tracker)
         return []
         
+
+class ActionMeetingJiaoban(Action):
+    """Executes the meeting jiaoban action"""
+
+    def name(self):
+        return 'action_meeting_jiaoban'
+
+    def run(self, dispatcher, tracker, domain):
+        is_affirm = tracker.get_slot('is_affirm')
+        if is_affirm is None:
+            return []
+        if is_affirm == "否":
+            dispatcher.utter_template('utter_answer_abandon', tracker)
+        else:
+            dispatcher.utter_template('utter_jiaoban_success', tracker)
+        return []
+
 
 class ActionTripHotelRecommend(Action):
     """Executes the trip hotel recommend"""

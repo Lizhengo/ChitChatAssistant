@@ -1,4 +1,4 @@
-intents:
+﻿intents:
   - affirm
   - deny
   - greet
@@ -8,9 +8,12 @@ intents:
   - whattodo
   - address_inform
   - time_inform
+  - schedule_time_inform
   - choose_inform
   - request_trip
+  - meeting_book
   - stop
+  - not_intent
 
 session_config:
   carry_over_slots_to_new_session: true
@@ -80,6 +83,39 @@ slots:
   is_affirm:
     type: unfeaturized
     auto_fill: false
+  meeting_schedule_time:
+    type: unfeaturized
+    auto_fill: false
+  meeting_start_time:
+    type: unfeaturized
+    auto_fill: false
+  meeting_end_time:
+    type: unfeaturized
+    auto_fill: false
+  meeting_start_date:
+    type: unfeaturized
+    auto_fill: false
+  meeting_end_date:
+    type: unfeaturized
+    auto_fill: false
+  meeting_name:
+    type: unfeaturized
+    auto_fill: false
+  meeting_type:
+    type: unfeaturized
+    auto_fill: false
+  meeting_topic:
+    type: unfeaturized
+    auto_fill: false
+  meeting_room:
+    type: unfeaturized
+    auto_fill: false
+  meeting_zhubanbumen:
+    type: unfeaturized
+    auto_fill: false
+  meeting_msg_remind:
+    type: unfeaturized
+    auto_fill: false
 
 entities:
   - start_time
@@ -103,6 +139,17 @@ entities:
   - nextnode
   - nextperson
   - is_affirm
+  - meeting_schedule_time
+  - meeting_start_time
+  - meeting_end_time
+  - meeting_start_date
+  - meeting_end_date
+  - meeting_name
+  - meeting_type
+  - meeting_topic
+  - meeting_room
+  - meeting_zhubanbumen
+  - meeting_msg_remind
 
 actions:
   - utter_answer_affirm
@@ -114,6 +161,7 @@ actions:
   - utter_answer_whoareyou
   - utter_answer_whattodo
   - utter_answer_abandon
+  - utter_answer_other_intent
   - utter_ask_start_time
   - utter_ask_start_address
   - utter_ask_end_time
@@ -137,6 +185,13 @@ actions:
   - utter_ask_is_affirm
   - utter_ask_abandon
   - utter_ask_continue
+  - utter_ask_meeting_schedule_time
+  - utter_ask_meeting_start_time
+  - utter_ask_meeting_end_time
+  - utter_ask_meeting_start_date
+  - utter_ask_meeting_end_date
+  - utter_ask_meeting_name
+  - utter_ask_meeting_topic
   - utter_wrong_start_time
   - utter_wrong_end_time
   - utter_wrong_start_address
@@ -160,10 +215,12 @@ actions:
   - action_trip_jiaoban
   - action_trip_hotel_recommend
   - action_trip_flight_recommend
+  - action_meeting_jiaoban
 
 forms:
   - trip_form
   - affirm_form
+  - meeting_form
 
 responses:
   utter_answer_affirm:
@@ -192,7 +249,7 @@ responses:
     - text: "怎么了，主人？"
   
   utter_answer_abandon:
-    - text: "已为您放弃本次差旅申请。"
+    - text: "已为您放弃本次申请。"
     
   utter_answer_thanks:
     - text: "嗯呢。不用客气~"
@@ -204,7 +261,10 @@ responses:
 
   utter_answer_whattodo:
     - text: "您好！很高兴为您服务，我目前支持差旅申请哦。"
-    
+  
+  utter_answer_other_intent:
+    - text: "如需办理其他业务请先输入 放弃申请 退出当前业务办理流程哦"
+
   utter_ask_start_time:
     - text: "请输入您的出差起始日期，如（2020-06-09）"
   
@@ -371,7 +431,28 @@ responses:
           payload: '/choose_inform{"is_affirm": "是"}'
         - title: "否"
           payload: '/choose_inform{"is_affirm": "否"}'
-    
+
+  utter_ask_meeting_schedule_time:
+    - text: "请描述会议室预定时间，如：明天早上9点-11点"
+
+  utter_ask_meeting_start_time:
+    - text: "请输入会议开始时间"
+  
+  utter_ask_meeting_end_time:
+    - text: "请输入会议结束时间"
+
+  utter_ask_meeting_start_date:
+    - text: "请输入会议开始日期"
+  
+  utter_ask_meeting_end_date:
+    - text: "请输入会议结束日期"
+
+  utter_ask_meeting_name:
+    - text: "请输入会议名称"
+
+  utter_ask_meeting_topic:
+    - text: "请输入会议议题"
+
   utter_default:
     - text: "没听懂，请换种说法吧~"
   
@@ -385,10 +466,10 @@ responses:
     - text: "帮您推荐 {start_time} 到 {end_time}, 从 {start_address} 到 {end_address} 的飞机行程如下:"
   
   utter_wrong_start_time:
-    - text: "日期不合法！"
+    - text: "日期或时间不合法！"
   
   utter_wrong_end_time:
-    - text: "日期不合法！"
+    - text: "日期或时间不合法！"
 
   utter_wrong_start_address:
     - text: "地点不合法！"
@@ -433,10 +514,10 @@ responses:
     - text: "请先进行确认是否交办哦。"
     
   utter_ask_continue:
-    - text: "请问您还要继续进行本次差旅申请吗?"
+    - text: "请问您还要继续进行本次申请吗?"
   
   utter_ask_abandon:
-    - text: "请问您确定要放弃本次差旅申请吗?"
+    - text: "请问您确定要放弃本次申请吗?"
   
   utter_noworries:
     - text: "不用客气 :)"
