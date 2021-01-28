@@ -245,7 +245,7 @@ responses:
     - text: "怎么了，主人？"
     
   utter_answer_stop:
-    - text: "您当前没有正在进行的差旅申请哦"
+    - text: "您当前没有正在进行的业务哦"
     - text: "怎么了，主人？"
   
   utter_answer_abandon:
@@ -260,7 +260,7 @@ responses:
     - text: "您好！我是小兴呀，您的AI智能助理"
 
   utter_answer_whattodo:
-    - text: "您好！很高兴为您服务，我目前支持差旅申请哦。"
+    - text: "您好！很高兴为您服务，我目前支持差旅申请和会议申请哦。"
   
   utter_answer_other_intent:
     - text: "如需办理其他业务请先输入 放弃申请 退出当前业务办理流程哦"
